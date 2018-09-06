@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Graphing App</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <script type="application/javascript">
+      var socket = new WebSocket('ws://' + window.location.host + '/graphing/');
+
+      socket.onopen = function open() {
+        console.log('Web Socket Connection Opened.');
+      };
+
+      socket.onmessage = function message(event) {
+        function rand() {
+          return parseFloat(event.data);
+        }
+
+        Plotly.plot('graph', [{
+          y: [],
+          mode: 'lines',
+          line: {color: '#80CAF6'}
+        }]);
+
+        Plotly.extendTraces('graph', {
+          y: [[rand()]]
+        }, [0]);
+
+      };
+
+      if (socket.readyState == WebSocket.OPEN) {
+        socket.onopen();
+      }
+
+      function start() {
+        socket.send('start');
+      }
+
+      function stop() {
+        socket.send('stop');
+      }
+    </script>
+</head>
+<body>
+<div class="container">
+  <h2>Graph</h2>
+  <p>Basic Django App that exposes a RESTful API endpoint for random number generator and display a graph using a streaming plot.ly graph.</p>
+  <button type="button" class="btn btn-success" onclick="start()">Start</button>
+  <button type="button" class="btn btn-danger" onclick="stop()">Stop</button>
+  <br>
+
+  <div id="graph"></div>
+</div>
+</body>
+</html>
